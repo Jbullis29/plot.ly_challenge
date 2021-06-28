@@ -21,38 +21,52 @@ function dropDown() {
       plotGauge(sampOne)
   });
 }
-// This line activates my drop down
+// This line activates my drop down function which connects all other functions below
 dropDown();
-
+// This fuunction runs all my functions below when a new number is selected from the drop down
 function optionChanged(newSample) {
   displaydata(newSample);
   plotCharts(newSample);
   plotGauge(newSample);
 }
-
+// This function changes the data displayed in the display box and saves it as variable sampleid
 function displaydata(sampleid) {
+  //read in my data save it as varible data
   d3.json('samples.json').then((data) => {
+    //pull the metadata from the data variable
       var Mdata = data.metadata;
+      //filter the metadata assigning it to row and matching the row id to the sample id 
       var filtered = Mdata.filter(row => row.id == sampleid);
+      //pulling the first set of data from the list
       var result = filtered[0];
+      // selecting the panel body where the data will go
       var pBody = d3.select('#sample-metadata');
+      //this empties the panel body upon new selection
       pBody.html('');
+      //this enteres each item in the data list to the panel body
       Object.entries(result).forEach(([key, value]) => {
+        // the $ is like the f statement in pythin. it allows you to insert a variable into a string
           pBody.append('h6').text(`${key} ${value}`);
       });
 
   });
 }
-
+// New function that plots the data for each specimen
 function plotCharts(specimen) {
+  // read in my data as data
   d3.json('samples.json').then((data) => {
+    //pull the samples from the data
       var samps = data.samples
+      //filter the sample datas where the id is equal to the specimen
       var picksamp = samps.filter(row => row.id == specimen);
       console.log(specimen);
+      // pull the OTU labels from my selected samples sort them from highest to lowest and slice to return the top 10
       var label = picksamp[0].otu_ids.sort((a, b) => b - a).slice(0, 10);
+      // pull the sample values of my specimen sort it and return the top 10 and then map the names to the values so that they appear on my Y Axis
       var value = picksamp[0].sample_values.sort((a, b) => b - a).slice(0, 10).map(otuID => `otu${otuID}`);
+      //pick the text so tjat it displays when the mouse moves over them
       var floaty_text = picksamp[0];
-
+      // saves my desired barchart specs to a variable most this can be found in plotly docs
       var barchart = [{
           x: label.reverse(),
           y: value,
@@ -61,6 +75,7 @@ function plotCharts(specimen) {
           orientation: 'h'
 
       }];
+      // assign chart title and fin detials to varible. also can be found on pltly 
       var chartspecifics = {
           title: 'Top 10 Bacteria per sample',
           yaxis: {
@@ -72,7 +87,7 @@ function plotCharts(specimen) {
               title: 'frequeny'
           }
       };
-
+      // do the same for my bubble chart specs can be found on pltly docs
       var bubbschart = [{
           x: label,
           y: value,
@@ -87,6 +102,7 @@ function plotCharts(specimen) {
 
 
       }];
+      //buble chart details just follow plotly docs
       var bubbsspecifics = {
           title: 'Top 10 Bacteria per sample',
           yaxis: {
@@ -99,14 +115,14 @@ function plotCharts(specimen) {
           }
       };
 
-
+      //plot both my graphs
       Plotly.newPlot('bar', barchart, chartspecifics);
       Plotly.newPlot('bubble', bubbschart, bubbsspecifics);
 
 
   });
 }
-
+//new function for my gauge because its a different array within the data but all the same as above and styling is from pltly docs
 function plotGauge(wash) {
   d3.json('samples.json').then((data) => {
       var metaData = data.metadata;
@@ -169,7 +185,7 @@ function plotGauge(wash) {
               family: "Arial"
           }
       };
-
+      // plot my gauge
       Plotly.newPlot('gauge', data, layout);
 
   });
